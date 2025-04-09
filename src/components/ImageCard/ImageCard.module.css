@@ -1,0 +1,19 @@
+.card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.image {
+  width: 540px;
+  height: 360px;
+  display: block;
+}
+
+.author {
+  margin: 8px 0;
+  font-size: 14px;
+  color: #555;
+}
