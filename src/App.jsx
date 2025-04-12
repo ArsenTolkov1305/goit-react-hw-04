@@ -28,6 +28,7 @@ export default function App() {
     setImages([]);
   };
 
+  
   const openModal = (image) => {
     console.log("openModal image:", image);
     setSelectedImage(image);
@@ -51,10 +52,13 @@ export default function App() {
       return;
     }
 
-    const fetchImages = async () => {
+    const fetchImages = async () => { // Add console.log() at the beginning of fetchImages
+      console.log("fetchImages called with query:", query, "and page:", page);
       setIsLoading(true);
       setError(null);
 
+
+      
       const url = `${BASE_URL}?client_id=${API_KEY}&query=${query}&page=${page}&per_page=12`;
       console.log("Fetching URL:", url);
 
@@ -63,20 +67,24 @@ export default function App() {
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const dt = await response.json();
-        if(dt.results.length === 0) {
-          throw new Error(`Not Found images for query: ${query}`)
+        const data = await response.json();
+        if(data.results.length === 0) {
+          throw new Error(`Not Found images for query: ${query}`);
         }
 
-        const images = dt.results.map(image => ({
+        const images = data.results.map(image => ({
           id: image.id,
           webformatURL: image.urls.regular,
           largeImageURL: image.urls.full,
           tags: image.alt_description,
         }));
 
+        console.log("images before setImages", images); // Add console.log() before calling setImages(images)
         setImages((prevImages) => [...prevImages, ...images]);
-      }
+        
+      } 
+
+      
        catch (err) {
         setError(`Error! ${err.message} `);
       } finally {
@@ -84,7 +92,9 @@ export default function App() {
       }
     }
 
+    
     fetchImages();
+
   }, [query, page]);
 
   return (
@@ -103,6 +113,7 @@ export default function App() {
         )}
       </main>
       {selectedImage && (
+        
         <ImageModal
           isOpen={!!selectedImage}
           onClose={closeModal}
@@ -112,3 +123,4 @@ export default function App() {
     </div>
   );
 }
+
