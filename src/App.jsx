@@ -29,6 +29,7 @@ export default function App() {
   };
 
   const openModal = (image) => {
+    console.log("openModal image:", image);
     setSelectedImage(image);
     setShowModal(true);
   };
@@ -66,6 +67,7 @@ export default function App() {
         if(dt.results.length === 0) {
           throw new Error(`Not Found images for query: ${query}`)
         }
+
         const imagesWithUrls = dt.results.map(photo => ({
           id: photo.id,
           webformatURL: photo.urls.small,
