@@ -62,21 +62,20 @@ export default function App() {
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const data = await response.json();
-        if(data.hits.length === 0) {
+        const dt = await response.json();
+        if(dt.results.length === 0) {
           throw new Error(`Not Found images for query: ${query}`)
         }
-        const imagesWithUrls = data.results.map(photo => ({
+        const imagesWithUrls = dt.results.map(photo => ({
           id: photo.id,
-          webformatURL: photo.urls.small, 
+          webformatURL: photo.urls.small,
           largeImageURL: photo.urls.full,
           tags: photo.alt_description || 'No description',
-          // Add more properties as needed
         }));
-        setTotalHits(data.total);
-        setImages((prevImages) => [...prevImages, ...data.hits]);
+        setTotalHits(dt.total);
+        setImages((prevImages) => [...prevImages, ...imagesWithUrls]);
       } catch (err) {
-        setError(`Error! ${err.message}`);
+        setError(`Error! ${err.message} `);
       } finally {
         setIsLoading(false);
       }
