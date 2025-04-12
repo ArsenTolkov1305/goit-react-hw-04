@@ -58,3 +58,13 @@ header {
   align-content: center;
   text-align: center;
 }
+
+.modalOpen {
+  overflow: hidden;
+}
+
+.header {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-bottom: 1px solid #dee2e6;
+}
