@@ -61,7 +61,7 @@ export default function App() {
       
       const url = `${BASE_URL}?client_id=${API_KEY}&query=${query}&page=${page}&per_page=12`;
       console.log("Fetching URL:", url);
-
+      
       try {
         const response = await fetch(url, { method: 'GET', headers: { 'Accept-Version': 'v1' } });
         if (!response.ok) {
@@ -70,13 +70,14 @@ export default function App() {
         const data = await response.json();
         if(data.results.length === 0) {
           throw new Error(`Not Found images for query: ${query}`);
-        }
+        } 
 
-        const images = data.results.map(image => ({
-          id: image.id,
-          webformatURL: image.urls.regular,
-          largeImageURL: image.urls.full,
-          tags: image.alt_description,
+         const images = data.results.map(image => ({
+           id: image.id,
+           webformatURL: image.urls.regular,
+           largeImageURL: image.urls.full,
+           tags: image.alt_description,
+          
         }));
 
         console.log("images before setImages", images); // Add console.log() before calling setImages(images)
