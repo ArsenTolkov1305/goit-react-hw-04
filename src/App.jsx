@@ -1,6 +1,5 @@
 // imports
 import { useState, useEffect, useMemo } from "react";
-import axios from "axios";
 import SearchBar from "./components/SearchBar/SearchBar";
 import ImageGallery from "./components/ImageGallery/ImageGallery";
 import ImageModal from "./components/ImageModal/ImageModal";
@@ -8,18 +7,19 @@ import Loader from "./components/Loader/Loader";
 import ErrorMessage from "./components/ErrorMessage/ErrorMessage";
 import LoadMoreBtn from "./components/LoadMoreBtn/LoadMoreBtn";
 import styles from "./App.module.css";
-// imports
+
+const API_KEY = "UlbZlsYFw5y3EnhXrtUZBlzGU97qU1-yy9MKaqkyUhI";
+const BASE_URL = "https://api.unsplash.com/search/photos";
 
 export default function App() {
-  const API_URL = "https://api.unsplash.com/search/photos";
-  const ACCESS_KEY = "UlbZlsYFw5y3EnhXrtUZBlzGU97qU1-yy9MKaqkyUhI";
-
   const [query, setQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
   const [images, setImages] = useState([]);
   const [page, setPage] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [totalHits, setTotalHits] = useState(0);
 
   // Очищення стану при зміні запиту
   useEffect(() => {
@@ -27,34 +27,46 @@ export default function App() {
     setPage(1);
   }, [query]);
 
-  // Завантаження зображень
   useEffect(() => {
     if (!query) return;
 
+    if (query.trim() === "") {
+      setError("Будь ласка, введіть коректний запит");
+      return;
+    }
+
     const fetchImages = async () => {
-      setLoading(true);
+      setIsLoading(true);
       setError(null);
 
-      try {
-        const response = await axios.get(API_URL, {
-          params: {
-            query,
-            page,
-            per_page: 12,
-            client_id: ACCESS_KEY,
-          },
-        });
+      const url = `${BASE_URL}?client_id=${API_KEY}&query=${query}&page=${page}&per_page=12`;
 
-        if (response.data && response.data.results) {
-          setImages((prevImages) => [...prevImages, ...response.data.results]);
-        } else {
-          setError("Результати не знайдено.");
+      try {
+        const response = await fetch(url, {
+          method: "GET",
+          headers: { "Accept-Version": "v1" },
+        });
+        if (!response.ok) {
+          throw new Error(`HTTP помилка! статус: ${response.status}`);
         }
-      } catch (error) {
-        console.error("Помилка завантаження:", error);
-        setError("Не вдалося завантажити зображення.");
+        const data = await response.json();
+        if (data.results.length === 0) {
+          throw new Error(`Не знайдено зображень для запиту: ${query}`);
+        }
+
+        const newImages = data.results.map((image) => ({
+          id: image.id,
+          webformatURL: image.urls.regular,
+          largeImageURL: image.urls.full,
+          tags: image.alt_description,
+        }));
+
+        setImages((prevImages) => [...prevImages, ...newImages]);
+        setTotalHits(data.total);
+      } catch (err) {
+        setError(`Помилка! ${err.message}`);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
@@ -73,17 +85,21 @@ export default function App() {
 
   const handleSearch = (searchQuery) => {
     setQuery(searchQuery);
+    setPage(1);
+    setImages([]);
   };
 
-  const handleImageClick = (image) => {
+  const openModal = (image) => {
     setSelectedImage(image);
+    setShowModal(true);
   };
 
   const closeModal = () => {
     setSelectedImage(null);
+    setShowModal(false);
   };
 
-  const loadMore = () => {
+  const handleLoadMore = () => {
     setPage((prevPage) => prevPage + 1);
   };
 
@@ -91,15 +107,20 @@ export default function App() {
   const memoizedImages = useMemo(() => images, [images]);
 
   return (
-    <div className={selectedImage ? styles.modalOpen : ""}>
+    <div className={showModal ? styles.modalOpen : ""}>
       <header className={styles.header}>
         <SearchBar onSubmit={handleSearch} />
       </header>
       <main>
+        {isLoading && <Loader />}
         {error && <ErrorMessage message={error} />}
-        <ImageGallery images={memoizedImages} onImageClick={handleImageClick} />
-        {loading && <Loader />}
-        {images.length > 0 && !loading && <LoadMoreBtn onClick={loadMore} />}
+        {!isLoading && !error && (
+          <ImageGallery images={memoizedImages} onImageClick={openModal} />
+        )}
+        {!isLoading &&
+          !error &&
+          images.length > 0 &&
+          images.length < totalHits && <LoadMoreBtn onClick={handleLoadMore} />}
       </main>
       {selectedImage && (
         <ImageModal

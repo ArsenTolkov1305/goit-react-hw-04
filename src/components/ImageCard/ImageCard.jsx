@@ -1,14 +1,19 @@
 import React from "react";
 import styles from "./ImageCard.module.css";
 
-export default function ImageCard({ image, onClick }) {
+export default function ImageCard({ image, onOpenModal }) {
+
   return (
-    <div className={styles.card} onClick={onClick}>
+    <li className={styles.card} onClick={() => onOpenModal(image)}>
       <img
         src={image.urls.small}
         alt={image.alt_description}
         className={styles.image}
+        loading="lazy"
+        width="400"
+        height="300"
       />
-    </div>
+      
+    </li>
   );
 }
