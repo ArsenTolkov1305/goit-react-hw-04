@@ -1,6 +1,7 @@
 import React from "react";
 import ReactModal from "react-modal";
 import styles from "./ImageModal.module.css";
+import PropTypes from "prop-types";
 
 ReactModal.setAppElement("#root");
 
@@ -18,11 +19,21 @@ export default function ImageModal({ isOpen, onClose, image }) {
         ✖
       </button>
       <img
-        src={image.urls.regular}
-        alt={image.alt_description}
+        src={image.largeImageURL}
+        alt={image.tags}
         className={styles.image}
       />
-      <p className={styles.description}>{image.alt_description}</p>
+      <p className={styles.description}>{image.tags}</p>
     </ReactModal>
   );
 }
+
+ImageModal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  image: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    largeImageURL: PropTypes.string.isRequired,
+    tags: PropTypes.string.isRequired,
+  }),
+};

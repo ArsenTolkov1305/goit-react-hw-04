@@ -6,12 +6,8 @@ export default function ImageGallery({ images, onImageClick }) {
   return (
     <ul className={styles.gallery}>
       {images.map((image) => (
-        <li
-          key={image.id}
-          className={styles.item}
-          onClick={() => onImageClick(image)}
-        >
-          <ImageCard image={image} />
+        <li key={image.id} className={styles.item}>
+          <ImageCard image={image} onOpenModal={onImageClick} />
         </li>
       ))}
     </ul>
@@ -19,6 +15,13 @@ export default function ImageGallery({ images, onImageClick }) {
 }
 
 ImageGallery.propTypes = {
-  images: PropTypes.array.isRequired,
+  images: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      webformatURL: PropTypes.string.isRequired,
+      largeImageURL: PropTypes.string.isRequired,
+      tags: PropTypes.string.isRequired,
+    })
+  ).isRequired,
   onImageClick: PropTypes.func.isRequired,
 };

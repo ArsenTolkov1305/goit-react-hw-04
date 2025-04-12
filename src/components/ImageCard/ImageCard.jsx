@@ -1,19 +1,29 @@
 import React from "react";
 import styles from "./ImageCard.module.css";
+import PropTypes from "prop-types";
 
 export default function ImageCard({ image, onOpenModal }) {
-
   return (
-    <li className={styles.card} onClick={() => onOpenModal(image)}>
+    <div className={styles.card}>
       <img
-        src={image.urls.small}
-        alt={image.alt_description}
+        src={image.webformatURL}
+        alt={image.tags}
         className={styles.image}
         loading="lazy"
         width="400"
         height="300"
+        onClick={() => onOpenModal(image)}
       />
-      
-    </li>
+    </div>
   );
 }
+
+ImageCard.propTypes = {
+  image: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    webformatURL: PropTypes.string.isRequired,
+    largeImageURL: PropTypes.string.isRequired,
+    tags: PropTypes.string.isRequired,
+  }).isRequired,
+  onOpenModal: PropTypes.func.isRequired,
+};

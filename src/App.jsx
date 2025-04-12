@@ -40,6 +40,7 @@ export default function App() {
       setError(null);
 
       const url = `${BASE_URL}?client_id=${API_KEY}&query=${query}&page=${page}&per_page=12`;
+      console.log("Fetching URL:", url);
 
       try {
         const response = await fetch(url, {
@@ -50,6 +51,8 @@ export default function App() {
           throw new Error(`HTTP помилка! статус: ${response.status}`);
         }
         const data = await response.json();
+        console.log("Received data:", data);
+
         if (data.results.length === 0) {
           throw new Error(`Не знайдено зображень для запиту: ${query}`);
         }
@@ -61,9 +64,12 @@ export default function App() {
           tags: image.alt_description,
         }));
 
+        console.log("New images:", newImages);
         setImages((prevImages) => [...prevImages, ...newImages]);
         setTotalHits(data.total);
+        console.log("Total hits:", data.total);
       } catch (err) {
+        console.error("Error details:", err);
         setError(`Помилка! ${err.message}`);
       } finally {
         setIsLoading(false);
@@ -84,9 +90,15 @@ export default function App() {
   }, [images]);
 
   const handleSearch = (searchQuery) => {
+    console.log("Search query received:", searchQuery);
     setQuery(searchQuery);
     setPage(1);
     setImages([]);
+    console.log("State after search:", {
+      query: searchQuery,
+      page: 1,
+      images: [],
+    });
   };
 
   const openModal = (image) => {
