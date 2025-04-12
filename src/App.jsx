@@ -7,10 +7,10 @@ import Loader from "./components/Loader/Loader";
 import ErrorMessage from "./components/ErrorMessage/ErrorMessage";
 import LoadMoreBtn from "./components/LoadMoreBtn/LoadMoreBtn";
 import styles from "./App.module.css";
-// imports
 
-const API_KEY = "39755547-f89324478b6a9d5a7f951b91a"; // Replace with your actual API key
-const BASE_URL = "https://pixabay.com/api/";
+const API_KEY = "UlbZlsYFw5y3EnhXrtUZBlzGU97qU1-yy9MKaqkyUhI"; 
+const BASE_URL = "https://api.unsplash.com/search/photos";
+
 
 export default function App() {
   const [query, setQuery] = useState("");
@@ -45,29 +45,42 @@ export default function App() {
   useEffect(() => {
     if (!query) return;
 
+    if(query.trim() === '') {
+      setError("Please, enter valid query")
+      return;
+    }
+
     const fetchImages = async () => {
       setIsLoading(true);
       setError(null);
 
+      const url = `${BASE_URL}?client_id=${API_KEY}&query=${query}&page=${page}&per_page=12`;
+      console.log("Fetching URL:", url);
+
       try {
-        const response = await fetch(
-          `${BASE_URL}?key=${API_KEY}&q=${query}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=12`
-        );
+        const response = await fetch(url, { method: 'GET', headers: { 'Accept-Version': 'v1' } });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        if (data.hits.length === 0) {
-          throw new Error(`Not Found images for query: ${query}`);
+        if(data.hits.length === 0) {
+          throw new Error(`Not Found images for query: ${query}`)
         }
-        setTotalHits(data.totalHits);
+        const imagesWithUrls = data.results.map(photo => ({
+          id: photo.id,
+          webformatURL: photo.urls.small, 
+          largeImageURL: photo.urls.full,
+          tags: photo.alt_description || 'No description',
+          // Add more properties as needed
+        }));
+        setTotalHits(data.total);
         setImages((prevImages) => [...prevImages, ...data.hits]);
       } catch (err) {
-        setError(err.message);
+        setError(`Error! ${err.message}`);
       } finally {
         setIsLoading(false);
       }
-    };
+    }
 
     fetchImages();
   }, [query, page]);
