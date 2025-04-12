@@ -68,15 +68,16 @@ export default function App() {
           throw new Error(`Not Found images for query: ${query}`)
         }
 
-        const imagesWithUrls = dt.results.map(photo => ({
-          id: photo.id,
-          webformatURL: photo.urls.small,
-          largeImageURL: photo.urls.full,
-          tags: photo.alt_description || 'No description',
+        const images = dt.results.map(image => ({
+          id: image.id,
+          webformatURL: image.urls.regular,
+          largeImageURL: image.urls.full,
+          tags: image.alt_description,
         }));
-        setTotalHits(dt.total);
-        setImages((prevImages) => [...prevImages, ...imagesWithUrls]);
-      } catch (err) {
+
+        setImages((prevImages) => [...prevImages, ...images]);
+      }
+       catch (err) {
         setError(`Error! ${err.message} `);
       } finally {
         setIsLoading(false);
@@ -97,7 +98,7 @@ export default function App() {
         {!isLoading && !error && (
           <ImageGallery images={images} onImageClick={openModal} />
         )}
-        {!isLoading && !error && images.length < totalHits && (
+        {!isLoading && !error && images.length > 0 && images.length < 10000 &&(
           <LoadMoreBtn onClick={handleLoadMore} />
         )}
       </main>
